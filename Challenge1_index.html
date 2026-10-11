@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Focus List — To-Do</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              glow: "0 20px 50px -20px rgb(99 102 241 / 0.45)",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("focus-list-theme");
+          var dark =
+            stored === "dark" ||
+            (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100"
+  >
+    <div
+      class="pointer-events-none fixed inset-0 overflow-hidden"
+      aria-hidden="true"
+    >
+      <div
+        class="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-indigo-400/30 blur-3xl dark:bg-indigo-500/20"
+      ></div>
+      <div
+        class="absolute -right-16 top-40 h-72 w-72 rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10"
+      ></div>
+      <div
+        class="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/10"
+      ></div>
+    </div>
+
+    <main class="relative mx-auto max-w-xl px-4 py-10 sm:py-16">
+      <header class="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <p
+            class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300"
+          >
+            GHW Cursor Challenge
+          </p>
+          <h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+            Focus List
+          </h1>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Add tasks, finish them, and pick up where you left off.
+          </p>
+        </div>
+        <button
+          id="theme-toggle"
+          type="button"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/80 text-slate-700 shadow-sm backdrop-blur transition hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:border-indigo-500 dark:hover:text-indigo-300"
+          aria-label="Toggle dark mode"
+        >
+          <svg
+            id="icon-sun"
+            class="hidden h-5 w-5 dark:block"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0-1.414 1.414M7.05 16.95l-1.414 1.414M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+          </svg>
+          <svg
+            id="icon-moon"
+            class="h-5 w-5 dark:hidden"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 14.3A8.5 8.5 0 1110.7 3 7 7 0 0021 14.3z"
+            />
+          </svg>
+        </button>
+      </header>
+
+      <section
+        class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-glow backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:p-6"
+      >
+        <form id="todo-form" class="flex gap-2">
+          <label class="sr-only" for="todo-input">New task</label>
+          <input
+            id="todo-input"
+            type="text"
+            maxlength="180"
+            autocomplete="off"
+            placeholder="What needs doing?"
+            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/15 dark:border-slate-700 dark:bg-slate-950 dark:placeholder:text-slate-500"
+          />
+          <button
+            type="submit"
+            class="shrink-0 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/30"
+          >
+            Add
+          </button>
+        </form>
+
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <p id="count-label" class="text-sm text-slate-500 dark:text-slate-400">
+            0 tasks
+          </p>
+          <div
+            class="inline-flex rounded-2xl border border-slate-200 bg-slate-100 p-1 text-xs font-medium dark:border-slate-700 dark:bg-slate-800"
+            role="tablist"
+            aria-label="Filter tasks"
+          >
+            <button
+              type="button"
+              data-filter="all"
+              class="filter-btn rounded-xl px-3 py-1.5 text-slate-900 dark:text-white"
+            >
+              All
+            </button>
+            <button
+              type="button"
+              data-filter="active"
+              class="filter-btn rounded-xl px-3 py-1.5 text-slate-500 dark:text-slate-400"
+            >
+              Active
+            </button>
+            <button
+              type="button"
+              data-filter="completed"
+              class="filter-btn rounded-xl px-3 py-1.5 text-slate-500 dark:text-slate-400"
+            >
+              Completed
+            </button>
+          </div>
+        </div>
+
+        <ul id="todo-list" class="mt-4 space-y-2"></ul>
+
+        <p
+          id="empty-state"
+          class="mt-6 hidden rounded-2xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400"
+        >
+          Nothing here yet. Add a task to get started.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "focus-list-tasks";
+      const THEME_KEY = "focus-list-theme";
+
+      const form = document.getElementById("todo-form");
+      const input = document.getElementById("todo-input");
+      const list = document.getElementById("todo-list");
+      const emptyState = document.getElementById("empty-state");
+      const countLabel = document.getElementById("count-label");
+      const themeToggle = document.getElementById("theme-toggle");
+      const filterButtons = document.querySelectorAll(".filter-btn");
+
+      let tasks = loadTasks();
+      let filter = "all";
+
+      function loadTasks() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function saveTasks() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      }
+
+      function uid() {
+        return crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + Math.random().toString(16).slice(2);
+      }
+
+      function visibleTasks() {
+        if (filter === "active") return tasks.filter((task) => !task.done);
+        if (filter === "completed") return tasks.filter((task) => task.done);
+        return tasks;
+      }
+
+      function setFilter(next) {
+        filter = next;
+        filterButtons.forEach((button) => {
+          const active = button.dataset.filter === filter;
+          button.classList.toggle("bg-white", active);
+          button.classList.toggle("shadow-sm", active);
+          button.classList.toggle("text-slate-900", active);
+          button.classList.toggle("dark:bg-slate-950", active);
+          button.classList.toggle("dark:text-white", active);
+          button.classList.toggle("text-slate-500", !active);
+          button.classList.toggle("dark:text-slate-400", !active);
+        });
+        render();
+      }
+
+      function render() {
+        const shown = visibleTasks();
+        list.innerHTML = "";
+
+        shown.forEach((task) => {
+          const item = document.createElement("li");
+          item.className =
+            "group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.done;
+          checkbox.className =
+            "h-5 w-5 cursor-pointer rounded border-slate-300 text-indigo-600 focus:ring-indigo-500";
+          checkbox.setAttribute("aria-label", "Mark task complete");
+          checkbox.addEventListener("change", () => {
+            task.done = checkbox.checked;
+            saveTasks();
+            render();
+          });
+
+          const text = document.createElement("span");
+          text.className =
+            "flex-1 text-sm " +
+            (task.done
+              ? "text-slate-400 line-through dark:text-slate-500"
+              : "text-slate-800 dark:text-slate-100");
+          text.textContent = task.title;
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className =
+            "rounded-xl px-2 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/60";
+          remove.textContent = "Delete";
+          remove.addEventListener("click", () => {
+            tasks = tasks.filter((entry) => entry.id !== task.id);
+            saveTasks();
+            render();
+          });
+
+          item.append(checkbox, text, remove);
+          list.appendChild(item);
+        });
+
+        const remaining = tasks.filter((task) => !task.done).length;
+        countLabel.textContent =
+          remaining === 1 ? "1 task left" : remaining + " tasks left";
+
+        emptyState.classList.toggle("hidden", shown.length > 0);
+        emptyState.textContent =
+          tasks.length === 0
+            ? "Nothing here yet. Add a task to get started."
+            : "No tasks in this filter.";
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = input.value.trim();
+        if (!title) return;
+        tasks.unshift({ id: uid(), title, done: false });
+        input.value = "";
+        saveTasks();
+        render();
+      });
+
+      filterButtons.forEach((button) => {
+        button.addEventListener("click", () => setFilter(button.dataset.filter));
+      });
+
+      themeToggle.addEventListener("click", () => {
+        const dark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
+      });
+
+      setFilter("all");
+      input.focus();
+    </script>
+  </body>
+</html>
